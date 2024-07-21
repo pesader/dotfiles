@@ -1,0 +1,176 @@
+format = """
+$line_break\
+$custom\
+$line_break\
+$username\
+$hostname\
+$localip\
+$shlvl\
+$singularity\
+$kubernetes\
+$directory\
+$vcsh\
+$fossil_branch\
+$git_branch\
+$git_commit\
+$git_state\
+$git_metrics\
+$git_status\
+$hg_branch\
+$pijul_channel\
+$docker_context\
+$package\
+$c\
+$cmake\
+$cobol\
+$daml\
+$dart\
+$deno\
+$dotnet\
+$elixir\
+$elm\
+$erlang\
+$fennel\
+$golang\
+$guix_shell\
+$haskell\
+$haxe\
+$helm\
+$java\
+$julia\
+$kotlin\
+$gradle\
+$lua\
+$nim\
+$nodejs\
+$ocaml\
+$opa\
+$perl\
+$php\
+$pulumi\
+$purescript\
+$python\
+$raku\
+$rlang\
+$red\
+$ruby\
+$rust\
+$scala\
+$solidity\
+$swift\
+$terraform\
+$vlang\
+$vagrant\
+$zig\
+$buf\
+$nix_shell\
+$conda\
+$meson\
+$spack\
+$memory_usage\
+$aws\
+$gcloud\
+$openstack\
+$azure\
+$env_var\
+$crystal\
+$sudo\
+$cmd_duration\
+$line_break\
+$jobs\
+$battery\
+$time\
+$status\
+$os\
+$container\
+$shell\
+$character"""
+add_newline = false
+scan_timeout = 5
+
+[custom.toolbox]
+description = "The activated toolbox container"
+command = "echo $(. /var/run/.containerenv; echo ${name}: ; grep -m 1 '^ID=' /etc/os-release | sed 's/ID=//'; grep '^VERSION_ID=' /etc/os-release | sed 's/VERSION_ID=//' | sed 's/\"//g')"
+when = """ [[ -f /run/.containerenv && -f /run/.toolboxenv ]] """
+style = "bold blue"
+format = "[$symbol \\[$output\\]]($style) "
+disabled = false
+symbol = "⬢"
+
+[hostname]
+ssh_only = true
+format = "[$hostname](bold green) in "
+
+[username]
+show_always = false
+format = "[$user]($style)@"
+
+[line_break]
+disabled = false
+
+[character]
+success_symbol = '[➜](bold green)'
+error_symbol = '[➜](bold red)'
+
+[shell]
+disabled = true
+unknown_indicator = ""
+fish_indicator = " "
+bash_indicator = " "
+nu_indicator = "ν "
+zsh_indicator = ""
+format = "$indicator"
+
+[cmd_duration]
+disabled = true
+
+[git_branch]
+symbol = " "
+
+[package]
+disabled = true
+
+[directory]
+read_only = " "
+
+[python]
+symbol = " "
+
+[golang]
+symbol = "ﳑ "
+
+[lua]
+symbol = " "
+
+[java]
+symbol = " "
+
+[nodejs]
+symbol = " "
+
+[rust]
+symbol = " "
+
+[ruby]
+symbol = " "
+
+[rlang]
+symbol = "ﳒ "
+
+[php]
+symbol = " "
+
+[scala]
+symbol = " "
+
+[cmake]
+symbol = " "
+
+[docker_context]
+symbol = " "
+
+[dotnet]
+symbol = " "
+
+[container]
+disabled = true

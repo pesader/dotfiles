@@ -1,0 +1,160 @@
+if [[ $ID == 'ubuntu' ]]; then
+  export LC_ALL=en_US.UTF-8
+  export LANG=en_US.UTF-8
+fi
+
+PATH=$PATH:$HOME/go/bin/
+PATH=$PATH:$HOME/.cargo/bin/
+PATH=$PATH:$HOME/.local/bin/
+
+# Additional completions
+fpath=(~/.zshrc.d/ $fpath)
+
+setopt histignorealldups sharehistory interactivecomments
+
+bindkey -e
+bindkey '^[[Z' reverse-menu-complete
+
+# huge history
+HISTSIZE=200000
+SAVEHIST=200000
+HISTFILE=~/.zsh_history
+setopt hist_ignore_all_dups
+setopt hist_ignore_space
+setopt auto_pushd
+
+# set terminal title
+DISABLE_AUTO_TITLE="true"
+
+# set preferred programs
+if [[ -n $SSH_CONNECTION ]]; then
+  export EDITOR="vim"
+else
+  export EDITOR="nvim"
+fi
+export VISUAL="nvim"
+
+# toolbx completion
+eval $(toolbox completion zsh)
+
+# eza aliases
+
+if command -v eza >/dev/null 2>&1 ; then
+    alias ls='eza'
+else
+    alias ls="ls --color"
+    alias ll='ls -alF'
+    alias la='ls -A'
+fi
+
+# common aliases
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+# flatpak aliases
+source $HOME/.config/aliases/flatpak.sh
+
+# pfetch configuration
+export PF_INFO="ascii title os kernel uptime memory"
+
+# use modern completion system
+test -r ~/.dir_colors && eval $(dircolors ~/.dir_colors)
+autoload -U compinit && compinit
+zstyle ':completion:*' menu select
+zstyle ":completion:*:default" list-colors ${(s.:.)LS_COLORS} "ma=40;1"
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
+zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
+
+repos=$HOME/Documents/repos/
+
+# syntax highlighting
+source $repos/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fpath=($fpath "$HOME/.zfunctions")
+
+# autosuggestions
+source $repos/zsh-autosuggestions/zsh-autosuggestions.zsh
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=242"
+
+# starship prompt
+unsetopt PROMPT_SP
+eval "$(starship init zsh)"
+
+# mise
+eval "$(mise activate zsh)"
+
+# direnv
+if command -v direnv >/dev/null 2>&1 ; then
+    eval "$(direnv hook zsh)"
+fi
+
+# fzf
+source $repos/fzf/shell/key-bindings.zsh
+export FZF_DEFAULT_OPTS=" \
+--color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
+--color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
+--color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8"
+
+# colored manpages
+export LESS="--RAW-CONTROL-CHARS"
+[[ -f ~/.LESS_TERMCAP ]] && . ~/.LESS_TERMCAP
+
+# user aliases
+alias clipimg='xclip -selection clip -t image/png'
+alias copy="xclip -sel clip"
+alias paste="xclip -o"
+alias trash='gio trash'
+alias todo='todo-txt'
+alias webm2png='parallel dwebp {} -o {.}.png ::: *.webp'
+alias lazyyadm='lazygit -ucd ~/.config/yadm -w ~ -g ~/.config/yadm/repo.git'
+alias exifrm='exiftool -all='
+alias ncspot='flatpak run io.github.hrkfdn.ncspot'
+
+# fuzzy xdg-open
+fuzzy-xdg-open() {
+  local output
+  output=$(fzf --height 40% --reverse </dev/tty) && xdg-open ${(q-)output}
+  zle reset-prompt
+}
+
+zle -N fuzzy-xdg-open
+bindkey '^o' fuzzy-xdg-open
+
+# fuzzy open in editor
+fuzzy-open-editor() {
+  local output
+  output=$(fzf --height 40% --reverse </dev/tty) && $EDITOR ${(q-)output}
+  zle reset-prompt
+}
+
+zle -N fuzzy-open-editor
+bindkey '^g' fuzzy-open-editor
+
+# edit command line on editor
+autoload -U edit-command-line
+zle -N edit-command-line
+bindkey '^v' edit-command-line
+
+# window title
+case "$TERM" in 
+    xterm*|rxvt*)
+        function xtitle () {
+            builtin print -n -- "\e]0;$@\a"
+        }
+        ;;
+    screen)
+        function xtitle () {
+            builtin print -n -- "\ek$@\e\\"
+        }
+        ;;
+    *)
+        function xtitle () {
+        }
+esac
+
+function precmd () {
+    xtitle "zsh ➜ $(print -P '%~')"
+}
+ function preexec () {
+    xtitle "zsh ➜ $(print -P $1: '%~')"
+}
